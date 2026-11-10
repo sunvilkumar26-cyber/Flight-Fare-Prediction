@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Flight Fare Predictor</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f3f6fb;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #102a43;
+            color: white;
+            padding: 25px 8%;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 35px;
+            border-radius: 14px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+        }
+
+        .form-card h2 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 28px;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 22px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            font-size: 14px;
+            background: white;
+            color: #1e293b;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .predict-btn {
+            flex: 1;
+            background: #2563eb;
+            color: white;
+        }
+
+        .predict-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .reset-btn {
+            background: #e2e8f0;
+            color: #334155;
+            padding-left: 25px;
+            padding-right: 25px;
+        }
+
+        .reset-btn:hover {
+            background: #cbd5e1;
+        }
+
+        .result {
+            margin-top: 28px;
+            padding: 25px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result h3 {
+            color: #047857;
+            margin-bottom: 12px;
+        }
+
+        .price {
+            font-size: 34px;
+            font-weight: bold;
+            color: #065f46;
+        }
+
+        .error {
+            margin-top: 22px;
+            padding: 16px;
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            padding: 25px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+
+            .form-card {
+                padding: 22px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>✈ Flight Fare Predictor</h1>
+    <p>Estimate your flight ticket price using Machine Learning</p>
+</header>
+
+<div class="container">
+
+    <div class="form-card">
+
+        <h2>Flight Details</h2>
+
+        <p class="subtitle">
+            Enter your journey information to estimate the flight fare.
+        </p>
+
+        <form method="POST">
+
+            <div class="form-grid">
+
+                <!-- Airline -->
+                <div class="field">
+                    <label>Airline</label>
+
+                    <select name="airline" required>
+                        <option value="">Select Airline</option>
+
+                        {% for item in dropdowns["Airline"] %}
+                        <option value="{{ item }}"
+                            {% if form_data.get("airline") == item %}selected{% endif %}>
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <!-- Journey Date -->
+                <div class="field">
+                    <label>Journey Date</label>
+
+                    <input
+                        type="date"
+                        name="journey_date"
+                        value="{{ form_data.get('journey_date', '') }}"
+                        required>
+                </div>
+
+                <!-- Source -->
+                <div class="field">
+                    <label>Source</label>
+
+                    <select name="source" required>
+                        <option value="">Select Source</option>
+
+                        {% for item in dropdowns["Source"] %}
+                        <option value="{{ item }}"
+                            {% if form_data.get("source") == item %}selected{% endif %}>
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <!-- Destination -->
+                <div class="field">
+                    <label>Destination</label>
+
+                    <select name="destination" required>
+                        <option value="">Select Destination</option>
+
+                        {% for item in dropdowns["Destination"] %}
+                        <option value="{{ item }}"
+                            {% if form_data.get("destination") == item %}selected{% endif %}>
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <!-- Departure Time -->
+                <div class="field">
+                    <label>Departure Time</label>
+
+                    <input
+                        type="time"
+                        name="departure_time"
+                        value="{{ form_data.get('departure_time', '') }}"
+                        required>
+                </div>
+
+                <!-- Arrival Time -->
+                <div class="field">
+                    <label>Arrival Time</label>
+
+                    <input
+                        type="time"
+                        name="arrival_time"
+                        value="{{ form_data.get('arrival_time', '') }}"
+                        required>
+                </div>
+
+                <!-- Duration -->
+                <div class="field">
+                    <label>Duration</label>
+
+                    <input
+                        type="text"
+                        name="duration"
+                        placeholder="Example: 2h 50m"
+                        value="{{ form_data.get('duration', '') }}"
+                        pattern="[0-9]+h(\s*[0-9]+m)?|[0-9]+m"
+                        title="Enter duration like 2h 50m or 45m"
+                        required>
+                </div>
+
+                <!-- Total Stops -->
+                <div class="field">
+                    <label>Total Stops</label>
+
+                    <select name="total_stops" required>
+                        <option value="">Select Stops</option>
+
+                        <option value="non-stop"
+                            {% if form_data.get("total_stops") == "non-stop" %}selected{% endif %}>
+                            Non-stop
+                        </option>
+
+                        <option value="1 stop"
+                            {% if form_data.get("total_stops") == "1 stop" %}selected{% endif %}>
+                            1 Stop
+                        </option>
+
+                        <option value="2 stops"
+                            {% if form_data.get("total_stops") == "2 stops" %}selected{% endif %}>
+                            2 Stops
+                        </option>
+
+                        <option value="3 stops"
+                            {% if form_data.get("total_stops") == "3 stops" %}selected{% endif %}>
+                            3 Stops
+                        </option>
+
+                        <option value="4 stops"
+                            {% if form_data.get("total_stops") == "4 stops" %}selected{% endif %}>
+                            4 Stops
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- Route -->
+                <div class="field full">
+                    <label>Route</label>
+
+                    <select name="route" required>
+                        <option value="">Select Route</option>
+
+                        {% for item in dropdowns["Route"] %}
+                        <option value="{{ item }}"
+                            {% if form_data.get("route") == item %}selected{% endif %}>
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="field full">
+                    <label>Additional Information</label>
+
+                    <select name="additional_info" required>
+                        <option value="">Select Additional Information</option>
+
+                        {% for item in dropdowns["Additional_Info"] %}
+                        <option value="{{ item }}"
+                            {% if form_data.get("additional_info") == item %}selected{% endif %}>
+                            {{ item }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+
+                <button type="submit" class="predict-btn">
+                    Predict Flight Fare
+                </button>
+
+                <button
+                    type="reset"
+                    class="reset-btn">
+                    Reset
+                </button>
+
+            </div>
+
+        </form>
+
+        <!-- Validation Error -->
+        {% if error %}
+        <div class="error">
+            <strong>Validation Error:</strong>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- Prediction Result -->
+        {% if prediction is not none %}
+        <div class="result">
+
+            <h3>Estimated Flight Fare</h3>
+
+            <div class="price">
+                ₹ {{ "{:,.2f}".format(prediction) }}
+            </div>
+
+            <p style="margin-top: 10px; color: #047857;">
+                Prediction completed successfully.
+            </p>
+
+        </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+<footer>
+    Flight Fare Prediction | Machine Learning Project
+</footer>
+
+</body>
+</html>
